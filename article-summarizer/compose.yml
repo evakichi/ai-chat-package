@@ -1,0 +1,34 @@
+services:
+  ai-chat-package-tika:
+    container_name: ai-chat-package-tika
+    hostname: ai-chat-package-tika
+    image: apache/tika:3.3.1.0-full
+    user: ubuntu
+    environment:
+      - TZ=${TZ}
+    restart: unless-stopped
+  ai-chat-package-summarizer:
+    container_name: ai-chat-package-summarizer
+    hostname: ai-chat-package-summarizer
+    build:
+      context: .
+      dockerfile: Dockerfile
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    volumes:
+      - ./cache/:/root/.cache/:rw
+      - ./summarizer.py:/root/py/summarizer.py:ro
+    environment:
+      - TZ=${TZ}
+      - TIKA_SERVER_JAR=http://ai-chat-package-tika:9998/
+      - TIKA_SERVER_ENDPOINT=http://ai-chat-package-tika:9998/
+      - DOMAIN_NAME=${DOMAIN_NAME}
+    ports:
+      - ${SUMMARIZER_PORT}:8861
+    command: /bin/sh  -c "python3 /root/py/summarizer.py"
+    restart: unless-stopped
