@@ -1,3 +1,5 @@
 cache
 certs
+chroma-data
+open-webui-data
 .env
