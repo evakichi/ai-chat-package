@@ -26,7 +26,7 @@ def calculate_power(base: float, exponent: float) -> float:
 
 @mcp.tool()
 def get_pegasus_summarize(dl_url:str)->str:
-    """dl_url をpegasusで要約します"""
+    """dl_url をダウンロードしてpegasusで要約します"""
     fname="tmp.pdf"
     print(os.getenv('DOMAIN_NAME'))
     UL_URL=f"http://{os.getenv('DOMAIN_NAME')}:8861/summarize/json?q=pegasus-xsum"
@@ -53,7 +53,7 @@ def get_pegasus_summarize(dl_url:str)->str:
 
 @mcp.tool()
 def get_bart_summarize(dl_url:str)->str:
-    """bartで要約します"""
+    """dl_url をダウンロードしてbartで要約します"""
     fname="tmp.pdf"
     UL_URL="http://{os.getenv('DOMAIN_NAME')}:8861/summarize/json?q=bart-large-cnn"
     

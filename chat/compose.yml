@@ -80,7 +80,7 @@ services:
       - 8003:8000
     volumes:
       - ./mcpo.py:/root/mcpo.py:ro
-      - ./pyproject.toml:/root/pyproject.toml:ro
+#      - ./pyproject.toml:/root/pyproject.toml:ro
     environment:
       - DOMAIN_NAME=${DOMAIN_NAME}
     tty: true

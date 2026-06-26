@@ -5,8 +5,8 @@ RUN apt-get update && apt-get upgrade -y && \
     curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ENV PATH=/root/.local/bin:$PATH
-COPY ./pyproject.toml /root/
-RUN cd /root && uv add fastmcp requests
+#COPY ./pyproject.toml /root/
+RUN cd /root && uv init && uv add fastmcp requests
 
 WORKDIR /root/
 EXPOSE 8000
