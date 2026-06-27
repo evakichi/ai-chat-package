@@ -10,16 +10,12 @@ import json
 
 mcp = FastMCP(
         name="HTTP Calculator",
-        instructions="今日のお題について件数を取得して、その件数のコンテンツを取得します。"
+        instructions="今日のダイジェストを出していきます。"
         )
-
-
-
-DIR = "/tmp/"
 
 @mcp.prompt()
 def revirw_tile()->str:
-    return f"今日のお題の結果を表示してください。"
+    return f"今日のダイジェストを pegasus-xsum で返してください。"
 
 @mcp.tool()
 def add(a: float, b: float) -> float:
@@ -37,8 +33,15 @@ def calculate_power(base: float, exponent: float) -> float:
     return base ** exponent
 
 @mcp.tool()
-async def get_all_articles(analysis_type:str)->list[dict]:
-    """ 今日のリストを analysis_type で解析して結果を返します。"""
+def download_pdf(title:str)->str:
+    """tilte のファイルのダウンロードURLを返します。"""
+    URL = f"http://{os.getenv('DOMAIN_NAME')}:8863/download/{title}"
+    print(URL)
+    return URL
+
+@mcp.tool()
+async def get_all_articles(analysis_type="pagasus-xsum")->str:
+    """ 今日のダイジェストを analysis_type で返します。"""
 
     if analysis_type == 'bart-large':
         UL_URL=f"http://{os.getenv('DOMAIN_NAME')}:8861/summarize/json?q=bart-large-cnn"
@@ -52,14 +55,17 @@ async def get_all_articles(analysis_type:str)->list[dict]:
     length = int(response.text)
     print(f"{str(length)}件のデータを{analysis_type}で取得します。")
     
-    results=[]
+    results="""
+    | 番号 | ファイル名 | 概要 |
+    |-----|-----|-----|
+    """
     for num in range(length):
         DL_URL=f"http://{os.getenv('DOMAIN_NAME')}:8863/filename/{str(num)}"
         response = requests.get(DL_URL)
-        filename = f"/tmp/{response.text}"
-        print(f"Download {filename}")
+        filename = response.text
+        print(f"Download({str(num+1)}) {filename}")
         
-        with open(filename, "wb") as f:
+        with open(f"/tmp/{filename}", "wb") as f:
             response = requests.get(f"http://{os.getenv('DOMAIN_NAME')}:8863/distribute/{str(num)}", stream=True)
             if not response.ok:
                 return response
@@ -69,7 +75,7 @@ async def get_all_articles(analysis_type:str)->list[dict]:
                 f.write(chunk)
 
         files = {
-                "file": ("tmp.pdf", open(filename, "rb"))
+                "file": ("tmp.pdf", open(f"/tmp/{filename}", "rb"))
         }
         
         response = requests.post(UL_URL, files=files)
@@ -77,64 +83,10 @@ async def get_all_articles(analysis_type:str)->list[dict]:
         # JSON を受け取る
         print(response.status_code)
         print(response.json())
-    
-        results.append({filename,response.json()['summary']})
+        summary = response.json()['summary']
+        results = results+"\n"+f"|{str(num+1)}|{filename}|{summary}|"
     
     return results
-
-@mcp.tool()
-async def get_article_summarize(item:str,sum_type:str,cxt:Context)->str:
-    """ item を sum_type を使って解析した結果を返す。"""
-    filename=f"/tmp/{item}"
-
-    if sum_type == 'bart-large':
-        UL_URL=f"http://{os.getenv('DOMAIN_NAME')}:8861/summarize/json?q=bart-large-cnn"
-        print("Use bart-large-cnn")
-    else:
-        UL_URL=f"http://{os.getenv('DOMAIN_NAME')}:8861/summarize/json?q=pegasus-xsum"
-        print("Use pegasus-xsum(default)")
-
-    files = {
-            "file": ("tmp.pdf", open(filename, "rb"))
-    }
-    response = requests.post(UL_URL, files=files)
-
-    # JSON を受け取る
-    print(response.status_code)
-    print(response.json())
-    
-    return response.json()['summary']
-
-@mcp.tool()
-async def get_summarize(sum_type:str,cxt:Context)->str:
-    """ 今日のお題を sum_type を使って取得する。"""
-
-    fname="tmp.pdf"
-    if sum_type == 'bart-large':
-        UL_URL=f"http://{os.getenv('DOMAIN_NAME')}:8861/summarize/json?q=bart-large-cnn"
-        print("Use bart-large-cnn")
-    else:
-        UL_URL=f"http://{os.getenv('DOMAIN_NAME')}:8861/summarize/json?q=pegasus-xsum"
-        print("Use pegasus-xsum(default)")
-
-    with open(fname, "wb") as f:
-        response = requests.get(f"https://arxiv.org/pdf/2606.27334", stream=True)
-        if not response.ok:
-            return response
-        for chunk in response.iter_content(1024):
-            if not chunk:
-                break
-            f.write(chunk)
-    files = {
-            "file": ("tmp.pdf", open(fname, "rb"))
-    }
-    response = requests.post(UL_URL, files=files)
-
-    # JSON を受け取る
-    print(response.status_code)
-    print(response.json())
-    
-    return response.json()['summary']
 
 if __name__ == "__main__":
     print("🌐 HTTP MCP Server starting...")

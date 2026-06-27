@@ -29,6 +29,15 @@ async def summarize(item:str):
         media_type="application/pdf"
     )
 
+@app.get('/download/{item}')
+async def download(item:str):
+    file_path = f"/uploads/{item}"
+    return FileResponse(
+        path=file_path, 
+        filename=os.path.basename(file_path), 
+        media_type="application/pdf"
+    )
+
 if __name__ == "__main__":
     import uvicorn
     from uvicorn.config import LOGGING_CONFIG
