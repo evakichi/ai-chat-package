@@ -13,13 +13,13 @@ def index():
     return len(files)
 
 @app.get('/filename/{item}')
-async def summarize(item:str):
+async def get_filename_by_number(item:str):
     num = int(item)
     file_path = files[num]
     return os.path.basename(file_path)
 
 @app.get('/distribute/{item}')
-async def summarize(item:str):
+async def distribute_by_number(item:str):
     num = int(item)
     file_path = files[num]
 
@@ -30,7 +30,7 @@ async def summarize(item:str):
     )
 
 @app.get('/download/{item}')
-async def download(item:str):
+async def download_by_filename(item:str):
     file_path = f"/uploads/{item}"
     return FileResponse(
         path=file_path, 
