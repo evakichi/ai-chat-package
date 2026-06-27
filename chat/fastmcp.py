@@ -10,7 +10,11 @@ import json
 
 mcp = FastMCP(
         name="HTTP Calculator",
-        instructions="今日のダイジェストを出していきます。"
+        instructions="""
+        今日のダイジェストを出します。
+        ダイジェストは番号とファイル名と概要の列を表示した表で出力します。
+        そしてその番号に対応したファイル名のPDFをダウンロードできるURLを提示します。
+        """
         )
 
 @mcp.prompt()
