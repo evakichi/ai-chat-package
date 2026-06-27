@@ -1,0 +1,17 @@
+services:
+  ai-chat-package-distributer:
+    container_name: ai-chat-package-distibuter
+    hostname: ai-chat-package-distributer
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./uploads/:/uploads/
+      - ./distributer.py:/root/py/distributer.py:ro
+    environment:
+      - TZ=${TZ}
+      - DOMAIN_NAME=${DOMAIN_NAME}
+    ports:
+      - ${DISTRIBUTER_PORT}:8863
+    command: /bin/sh  -c "python3 /root/py/distributer.py"
+    restart: unless-stopped

@@ -70,16 +70,16 @@ services:
     volumes:
       - ./chroma-data/:/data/
     restart: unless-stopped
-  ai-chat-package-mcpo:
-    hostname: ai-chat-package-mcpo
-    container_name: ai-chat-package-mcpo
+  ai-chat-package-fastmcp:
+    hostname: ai-chat-package-fastmcp
+    container_name: ai-chat-package-fastmcp
     build:
       context: ./
-      dockerfile: Dockerfile.mcpo
+      dockerfile: Dockerfile.fastmcp
     ports:
-      - 8003:8000
+      - 8000:8000
     volumes:
-      - ./mcpo.py:/root/mcpo.py:ro
+      - ./fastmcp.py:/root/fastmcp-server.py:ro
     environment:
       - DOMAIN_NAME=${DOMAIN_NAME}
     tty: true

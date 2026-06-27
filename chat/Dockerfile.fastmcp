@@ -1,14 +1,13 @@
 FROM python:3.13.14-trixie
 
 RUN apt-get update && apt-get upgrade -y && \
-    apt-get update && apt-get install -y vim curl nodejs && \
+    apt-get update && apt-get install -y vim curl less && \
     curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ENV PATH=/root/.local/bin:$PATH
-#COPY ./pyproject.toml /root/
 RUN cd /root && uv init && uv add fastmcp requests
 
 WORKDIR /root/
 EXPOSE 8000
 
-CMD ["/root/.local/bin/uv","run","python3","/root/mcpo.py"]
+CMD ["/root/.local/bin/uv","run","python3","/root/fastmcp-server.py"]
